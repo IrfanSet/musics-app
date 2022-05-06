@@ -10,12 +10,12 @@ const Jwt = require('@hapi/jwt');
 
 // users
 const users = require('./api/users');
-const usersService = require('./services/users/UsersService');
+const UsersService = require('./services/users/UsersService');
 const usersValidator = require('./validator/UsersValidator');
 
 // authentocations
 const authentications = require('./api/authentications')
-const authenticationsService = require('./services/authentications/AuthenticationsService');
+const AuthenticationsService = require('./services/authentications/AuthenticationsService');
 const authenticationsValidator = require('./validator/AuthenticationsValidator');
 const tokenManager = require('./tokenize/TokenManager');
 
@@ -23,6 +23,11 @@ const tokenManager = require('./tokenize/TokenManager');
 const playlists = require('./api/playlists');
 const playlistsService = require('./services/playlists/PlaylistsService');
 const playlistValidator = require('./validator/PlaylistsValidator');
+
+// playlist songs
+const playlistSongs = require('./api/playlist_songs');
+const PlaylistSongService = require('./services/playlist_song/PlaylistSongsService');
+const playlistSongValidator = require('./validator/PlaylistSongValidator')
 
 const server = hapi.server({
     port: process.env.port,
@@ -38,9 +43,10 @@ async function start() {
     try {
         const albumsService = new AlbumsService();
         const songsService = new SongsService();
-        const UsersService = new usersService();
-        const AuthenticationsService = new authenticationsService();
+        const usersService = new UsersService();
+        const authenticationService = new AuthenticationsService();
         const PlaylistsService = new playlistsService();
+        const playlistSongService = new PlaylistSongService;
 
         await server.register([{
             plugin: Jwt
@@ -79,14 +85,14 @@ async function start() {
             {
                 plugin: users,
                 options: {
-                    service: UsersService,
+                    service: usersService,
                     validator: usersValidator
                 }
             },
             {
                 plugin: authentications,
                 options: {
-                    AuthenticationsService,
+                    authenticationService,
                     usersService,
                     tokenManager: tokenManager,
                     validator: authenticationsValidator
@@ -97,6 +103,15 @@ async function start() {
                 options: {
                     service: PlaylistsService,
                     validator: playlistValidator
+                }
+            },
+            {
+                plugin: playlistSongs,
+                options: {
+                    playlistSongService,
+                    songsService,
+                    PlaylistsService,
+                    validator: playlistSongValidator
                 }
             },
         ]);

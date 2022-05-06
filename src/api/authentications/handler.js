@@ -1,13 +1,15 @@
 const ClientError = require("../../exceptions/ClientError");
 
 class AuthenticationsHanlder {
-    constructor(authenticationsService, usersService, tokenManager, validator) {
-        this._authenticationsService = authenticationsService;
+    constructor(authenticationService, usersService, tokenManager, validator) {
+        this._authenticationService = authenticationService;
         this._usersService = usersService;
         this._tokenManager = tokenManager;
         this._validator = validator;
 
-
+        this.postAuthenticationHandler = this.postAuthenticationHandler.bind(this);
+        this.putAuthenticationHandler = this.putAuthenticationHandler.bind(this);
+        this.deleteAuthenticationHandler = this.deleteAuthenticationHandler.bind(this);
     }
 
     async postAuthenticationHandler(request, h) {
@@ -18,10 +20,10 @@ class AuthenticationsHanlder {
                 password
             } = request.payload;
             const id = await this._usersService.verifyUserCredential(username, password);
-            const accessToken = this._tokenManager.generateAccessToken({
+            const accessToken = await this._tokenManager.generateAccessToken({
                 id
             });
-            const refreshToken = this._tokenManager.generateRefreshToken({
+            const refreshToken = await this._tokenManager.generateRefreshToken({
                 id
             });
 

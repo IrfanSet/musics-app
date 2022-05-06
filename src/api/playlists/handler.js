@@ -1,3 +1,5 @@
+const ClientError = require('../../exceptions/ClientError');
+
 class PlaylistHandler{
     constructor(service, validator){
         this._service = service;
@@ -10,11 +12,11 @@ class PlaylistHandler{
 
     async postPlaylistHandler(request, h){
         try {
-            this.validator.validatePlaylistPayload(request.payload);
+            this._validator.validatePlaylistPayload(request.payload);
     
             const {name} = request.payload;
             const {id:owner} = request.auth.credentials;
-    
+            
             const playlistId = await this._service.addPlaylist({name, owner});
             
             const response = h.response({
@@ -32,7 +34,7 @@ class PlaylistHandler{
                     status: 'fail',
                     message: error.message
                 });
-                response.code(error.code);
+                response.code(error.statusCode);
                 return response;
             }            
 
@@ -82,7 +84,7 @@ class PlaylistHandler{
                     status: 'fail',
                     message: error.message
                 });
-                response.code(error.code);
+                response.code(error.statusCode);
                 return response;
             }            
 

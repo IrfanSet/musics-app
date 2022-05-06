@@ -19,7 +19,7 @@ class UsersService {
         fullname
     }) {
         // validasi usernaem
-        this.verifyNewUsername(username);
+        await this.verifyNewUsername(username);
         // end of validasi
         const id = `user-${nanoid(16)}`;
 

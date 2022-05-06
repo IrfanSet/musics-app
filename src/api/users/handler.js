@@ -14,7 +14,7 @@ class UsersHandler{
     
             const {username, password, fullname} = request.payload;
 
-            const userId = await this._service.addUSers({username, password, fullname});
+            const userId = await this._service.addUsers({username, password, fullname});
 
             const response = h.response({
                 status: 'success',
@@ -31,7 +31,7 @@ class UsersHandler{
                     status: 'fail',
                     message: error.message
                 });
-                response.code(error.code);
+                response.code(error.statusCode);
                 return response;
             }            
 
