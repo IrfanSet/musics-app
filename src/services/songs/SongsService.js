@@ -5,6 +5,7 @@ const {
     nanoid
 } = require('nanoid');
 const NotFoundError = require('../../exceptions/NotFoundError');
+const InvariantError = require('../../exceptions/InvariantError');
 
 class SongsService {
     constructor() {
@@ -146,6 +147,18 @@ class SongsService {
 
         if (!result.rows.length) {
             throw new NotFoundError('Id tidak ditemukan');
+        }
+    }
+    async verifySongIdDelete(songId){
+        const query = {
+            text: 'Select * from songs where id = $1',
+            values: [songId]
+        }
+
+        const result = await this._pool.query(query);
+
+        if (!result.rows.length) {
+            throw new InvariantError('Id tidak ditemukan');
         }
     }
 

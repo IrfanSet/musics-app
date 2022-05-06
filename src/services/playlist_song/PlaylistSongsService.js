@@ -34,7 +34,7 @@ class PlaylistSongsService{
         const result = await this._pool.query(query);
 
         const query2 = {
-            text: `select pls.song_id, sgs.title, sgs.performer from playlist_songs as pls 
+            text: `select pls.song_id as id, sgs.title, sgs.performer from playlist_songs as pls 
                    left join songs as sgs on pls.song_id = sgs.id
                    left join playlists as pl on pl.id = pls.playlist_id
                    left join users as usr on usr.id = pl.owner
@@ -44,20 +44,28 @@ class PlaylistSongsService{
 
         const result2 = await this._pool.query(query2);
 
-        return [result.rows,result2.rows];
+        return [result.rows[0],result2.rows];
     }
 
-    async deletePlaylistSongs(owner, playlistId, songId){
-
+    async deletePlaylistSongs(playlistId, songId){
+        this.verifyDeletePlaylist(playlistId, songId);
         const query = {
             text: 'delete from playlist_songs where playlist_id = $1 and song_id = $2 returning playlist_id',
             values: [playlistId, songId]
         }
 
-        const result = await this._pool.query(query);
+        await this._pool.query(query);
+    }
 
+    async verifyDeletePlaylist(playlistId, songId){
+        const query = {
+            text: 'select * from playlist_songs where playlist_id = $1 and song_id = $2',
+            values: [playlistId, songId]
+        }
+        const result = await this._pool.query(query);
+        
         if (!result.rows.length) {
-            throw new NotFoundError('plalist_id atau song_id tidak ditemukan');
+            throw new NotFoundError('playist_id atau song_id tidak ditemukan');
         }
     }
 }

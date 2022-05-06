@@ -63,14 +63,19 @@ class PlaylistSongsHandler{
         try {
             const {id} = request.params;
             const {id:owner} = request.auth.credentials;
+            await this._playlistServices.verifyOwnerPlaylist(id, owner);
 
             const result = await this._playlistSongService.getPlaylistSongs(id, owner);
             const playlists = result[0];
-            playlists['songs'] = result[1];
+            if (playlists != undefined) {
+                playlists['songs'] = result[1];
+            }
 
             const response = h.response({
                 status: 'success',
-                data: playlists
+                data: {
+                    playlist: playlists
+                }
             });
             response.code(200);
             return response;
@@ -102,7 +107,7 @@ class PlaylistSongsHandler{
             const {id:owner} = request.auth.credentials;
     
             // validasi songId
-            await this._songsService.verifySongId(songId);
+            await this._songsService.verifySongIdDelete(songId);
             // validasi owner
             await this._playlistServices.verifyOwnerPlaylist(id, owner);
             // end of validasi

@@ -59,13 +59,16 @@ class PlaylistsService{
 
     async verifyOwnerPlaylist(playlistId, owner){
         const query = {
-            text: 'select * from playlists where id = $1 and owner = $2',
-            values: [playlistId, owner]
+            text: 'select * from playlists where id = $1',
+            values: [playlistId]
         }
 
         const result = await this._pool.query(query);
+        if (!result.rows.length) {
+            throw new NotFoundError('Id tidak ditemukan');
+        }
     
-        if (result.rows.length <= 0) {
+        if (result.rows[0].owner !== owner) {
             throw new AuthorizationsError('Anda tidak berhak memiliki resource ini');
         }
     }
