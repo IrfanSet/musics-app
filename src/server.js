@@ -7,6 +7,8 @@ const songs = require('./api/songs');
 const AlbumValidator = require('./validator/AlbumValidator');
 const songsValidator = require('./validator/SongValidator');
 const Jwt = require('@hapi/jwt');
+const Inert = require('@hapi/inert');
+const path = require('path');
 
 // users
 const users = require('./api/users');
@@ -27,7 +29,12 @@ const playlistValidator = require('./validator/PlaylistsValidator');
 // playlist songs
 const playlistSongs = require('./api/playlist_songs');
 const PlaylistSongService = require('./services/playlist_song/PlaylistSongsService');
-const playlistSongValidator = require('./validator/PlaylistSongValidator')
+const playlistSongValidator = require('./validator/PlaylistSongValidator');
+
+// uploads 
+const uploads = require('./api/uploads');
+const storageService = require('./services/storage/StorageService');
+const uploadsValidator = require('./validator/uploads');
 
 const server = hapi.server({
     port: process.env.port,
@@ -47,10 +54,15 @@ async function start() {
         const authenticationService = new AuthenticationsService();
         const PlaylistsService = new playlistsService();
         const playlistSongService = new PlaylistSongService;
+        const StorageService = new storageService(path.resolve(__dirname, 'api/uploads/file/images'));
 
         await server.register([{
-            plugin: Jwt
-        }, ]);
+                plugin: Jwt
+            },
+            {
+                plugin: Inert
+            }
+        ]);
         server.auth.strategy('musicsapp_jwt', 'jwt', {
             keys: process.env.ACCESS_TOKEN_KEY,
             verify: {
@@ -67,8 +79,7 @@ async function start() {
             }),
         });
 
-        await server.register([
-            {
+        await server.register([{
                 plugin: albums,
                 options: {
                     service: albumsService,
@@ -114,6 +125,14 @@ async function start() {
                     validator: playlistSongValidator
                 }
             },
+            {
+                plugin: uploads,
+                options: {
+                    service: StorageService,
+                    validator: uploadsValidator,
+                    albumService: albumsService
+                }
+            }
         ]);
         await server.start();
     } catch (err) {

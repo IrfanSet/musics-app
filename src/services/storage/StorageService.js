@@ -1,10 +1,10 @@
 const fs = require('fs');
 const Pool = require('pg');
+const NotFoundError = require('../../exceptions/NotFoundError');
 
 class StorageService {
     constructor(folder) {
         this._folder = folder;
-        this._poll = new Pool;
 
         if (!fs.existsSync(folder)) {
             fs.mkdirSync(folder, {
@@ -26,14 +26,5 @@ class StorageService {
         });
     }
 
-    saveUrl(id, url){
-        const query = {
-            text: 'update albums set cover = $1 where id = $2 returning id',
-            values: [url, id]
-        }
-
-        const result = await t
-
-    }
 }
 module.exports = StorageService;
