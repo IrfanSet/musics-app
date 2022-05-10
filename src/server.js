@@ -36,6 +36,18 @@ const uploads = require('./api/uploads');
 const storageService = require('./services/storage/StorageService');
 const uploadsValidator = require('./validator/uploads');
 
+//exports
+const _exports = require('./api/exports');
+const ProducerService = require('./services/rabbitmq/ProducerService');
+const ExportsValidator = require('./validator/exports');
+
+// album likes
+const albumLikes = require('./api/albumLikes');
+const AlbumLikesService = require('./services/albumLikes/AlbumLikesService');
+
+// cache
+const CacheService = require('./services/redis/CacheService');
+
 const server = hapi.server({
     port: process.env.port,
     host: process.env.host,
@@ -55,6 +67,8 @@ async function start() {
         const PlaylistsService = new playlistsService();
         const playlistSongService = new PlaylistSongService;
         const StorageService = new storageService(path.resolve(__dirname, 'api/uploads/file/images'));
+        const cacheService = new CacheService();
+        const albumLikesService = new AlbumLikesService(cacheService);
 
         await server.register([{
                 plugin: Jwt
@@ -131,6 +145,20 @@ async function start() {
                     service: StorageService,
                     validator: uploadsValidator,
                     albumService: albumsService
+                }
+            },
+            {
+                plugin: _exports,
+                options: {
+                    service: ProducerService,
+                    validator: ExportsValidator,
+                    playlistService: PlaylistsService
+                }
+            },
+            {
+                plugin: albumLikes,
+                options: {
+                    service: albumLikesService
                 }
             }
         ]);

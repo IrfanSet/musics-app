@@ -67,11 +67,14 @@ class PlaylistsService{
         if (!result.rows.length) {
             throw new NotFoundError('Id tidak ditemukan');
         }
-    
-        if (result.rows[0].owner !== owner) {
+        
+        const Unmatch = result.rows[0].owner !== owner;
+        
+        if (Unmatch) {
             throw new AuthorizationsError('Anda tidak berhak memiliki resource ini');
-        }
+        } 
     }
+
 }
 
 module.exports = PlaylistsService;
