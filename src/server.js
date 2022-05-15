@@ -49,8 +49,8 @@ const AlbumLikesService = require('./services/albumLikes/AlbumLikesService');
 const CacheService = require('./services/redis/CacheService');
 
 const server = hapi.server({
-    port: process.env.port,
-    host: process.env.host,
+    port: process.env.PORT,
+    host: process.env.HOST,
     routes: {
         cors: {
             origin: ['*']

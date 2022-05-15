@@ -10,7 +10,7 @@ class albumLikesHandler{
 
     async postLikesHandler(request, h){
        try {
-        const {user} = request.auth.credentials.id;
+        const user = request.auth.credentials.id;
         const {id} = request.params;
 
         await this._services.postLikes(id,user);
@@ -52,7 +52,7 @@ class albumLikesHandler{
         const response = h.response({
             status: 'success',
             data: {
-                likes: result
+                'likes': result
             }
         });
 

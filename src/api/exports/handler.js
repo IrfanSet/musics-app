@@ -6,14 +6,14 @@ class ExportsHandler {
         this._validator = validator;
         this._playlistService = playlistService;
 
-        this.postExportNotesHandler = this.postExportNotesHandler.bind(this);
+        this.postExportMusicsHandler = this.postExportMusicsHandler.bind(this);
     }
 
-    async postExportNotesHandler(request, h) {
+    async postExportMusicsHandler(request, h) {
         try {
             await this._validator.validateExportNotesPayload(request.payload);
             const {playlistId} = request.params;
-            const {userId} = request.auth.credentials.id;
+            const userId = request.auth.credentials.id;
             await this._playlistService.verifyOwnerPlaylist(playlistId, userId);
             
             const message = {
