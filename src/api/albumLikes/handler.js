@@ -13,12 +13,12 @@ class albumLikesHandler{
         const user = request.auth.credentials.id;
         const {id} = request.params;
 
-        await this._services.postLikes(id,user);
+        const result = await this._services.postLikes(id,user);
 
         const response = h.response({
             status: 'success',
-            message: 'hapus/insert berhasil'
-        });
+            message: `${result} berhasil`
+        })
         response.code(201);
         return response;
        } catch (error) {
@@ -47,12 +47,12 @@ class albumLikesHandler{
     async getLikesHandler(request, h){
         const {id} = request.params;
         
-        const {result, isCache = 0} = await this._services.getLikes(id)
+        const {likes, isCache = 0} = await this._services.getLikes(id)
         
         const response = h.response({
             status: 'success',
             data: {
-                'likes': result
+                likes: likes.length
             }
         });
 

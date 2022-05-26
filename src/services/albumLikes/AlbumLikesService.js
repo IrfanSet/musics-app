@@ -1,7 +1,7 @@
 const { nanoid } = require("nanoid");
 const { Pool } = require("pg");
 const NotFoundError = require("../../exceptions/NotFoundError");
-
+const InvariantError = require('../../exceptions/InvariantError');
 class AlbumLikesService{
     constructor(cacheService){
         this._pool = new Pool;
@@ -16,20 +16,29 @@ class AlbumLikesService{
         }
 
         const result = await this._pool.query(query);
+        console.log(result.rows);
+        // return false
 
-        if (!result.rows.length) {
+        if (result.rows.length != 0) {
             const query = {
                 text: 'delete from user_album_likes where album_id = $1 and user_id = $2',
                 values: [id, user]
             }
             await this._pool.query(query);
+            await this._cacheService.delete(`likes:${id}`);
+            return 'hapus'
         } else {
             const id_ = `like-${nanoid(16)}`
             const newQuery = {
-                text: 'insert into user_album_likes values($1, $2, $3)',
+                text: 'insert into user_album_likes values($1, $2, $3) returning id',
                 values: [id_, user, id]
             }
-            await this._pool.query(newQuery);
+            const newRun = await this._pool.query(newQuery);
+            if (!newRun.rows[0].id) {
+                throw new InvariantError('Likes gagal ditambahkan');
+            }
+            await this._cacheService.delete(`likes:${id}`);
+            return 'insert'
         }
     }
 
@@ -39,15 +48,14 @@ class AlbumLikesService{
             return { likes: JSON.parse(result), isCache: 1 };
         } catch (error) {
             const query = {
-                text: 'select count(id) as likes from user_album_likes where album_id=$1',
+                text: 'select * from user_album_likes where album_id = $1',
                 values: [id]
             }
     
             const result = await this._pool.query(query);
+            await this._cacheService.set(`likes:${id}`, JSON.stringify(result.rows));
     
-            await this._cacheService.set(`likes:${id}`, JSON.stringify(result.rows[0].likes));
-    
-            return result.rows[0].likes;
+            return {likes: result.rows};
         }
     }
 
